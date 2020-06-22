@@ -16,14 +16,14 @@
 <script src="https://unpkg.com/three@0.106.2/examples/js/loaders/GLTFLoader.js"></script>
 <div id="map"></div>
 <script>
-	mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGFuZGVyMjI0IiwiYSI6ImNrYW92dHBiODBoem0yeXBvcWs1aTJ3NmYifQ.tMwEb4L_85cbIpRyNASCEQ';
+	mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGFuZGVyMjI0IiwiYSI6ImNrYW92dXpweTBiYzAyeHFlb3JoaGg3cjIifQ.9QlnMMIssEl5OmiIg7NYNA';
     var map = (window.map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/light-v10',
         zoom: 18,
         center: [148.9819, -35.3981],
         pitch: 60,
-        antialias: true // create the gl context with MSAA antialiasing, so custom layers are antialiased
+        antialias: false // create the gl context with MSAA antialiasing, so custom layers are antialiased
     }));
 
     // parameters to ensure the model is georeferenced correctly on the map
@@ -64,20 +64,28 @@
             // create two three.js lights to illuminate the model
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(0, -70, 100).normalize();
+            //directionalLight.position.set(0, 0, 0).normalize();
             this.scene.add(directionalLight);
 
             var directionalLight2 = new THREE.DirectionalLight(0xffffff);
             directionalLight2.position.set(0, 70, 100).normalize();
+            //directionalLight2.position.set(0, 0, 0).normalize();
             this.scene.add(directionalLight2);
 
             // use the three.js GLTF loader to add the 3D model to the three.js scene
             var loader = new THREE.GLTFLoader();
             loader.load(
-                '/Users/aleksandr/Downloads/OYM-Map/3d/sample/simple_first_story_house/scene.gltf',
-                function(gltf) {
-                    this.scene.add(gltf.scene);
-                }.bind(this)
-            );
+                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2Fout.glb?v=1592320077781', result => { 
+                model = result.scene.children[0]; //select first object in the model file
+                model.position.set(0,0,0); //set model position
+                this.scene.add(model); //add model to the scene
+            });
+            loader.load(
+                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2Fout.glb?v=1592320077781', result => { 
+                model = result.scene.children[0]; //select first object in the model file
+                model.position.set(0,4,0); //set model position
+                this.scene.add(model); //add model to the scene
+            });
             this.map = map;
 
             // use the Mapbox GL JS map canvas for three.js
