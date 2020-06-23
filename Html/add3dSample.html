@@ -12,11 +12,59 @@
 </style>
 </head>
 <body>
+    <style>
+        #menu {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        top: 10px;
+        right: 10px;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        font-family: 'Open Sans', sans-serif;
+        }
+         
+        #menu a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+        text-align: center;
+        }
+         
+        #menu a:last-child {
+        border: none;
+        }
+         
+        #menu a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+        }
+         
+        #menu a.active {
+        background-color: #3887be;
+        color: #ffffff;
+        }
+         
+        #menu a.active:hover {
+        background: #3074a4;
+        }
+</style>
+<nav id="menu"></nav>
 <script src="https://unpkg.com/three@0.106.2/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.106.2/examples/js/loaders/GLTFLoader.js"></script>
 <div id="map"></div>
 <script>
-	mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGFuZGVyMjI0IiwiYSI6ImNrYW92dXpweTBiYzAyeHFlb3JoaGg3cjIifQ.9QlnMMIssEl5OmiIg7NYNA';
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGFuZGVyMjI0IiwiYSI6ImNrYW92dXpweTBiYzAyeHFlb3JoaGg3cjIifQ.9QlnMMIssEl5OmiIg7NYNA';
+    var theModel;
+    var renderer;
+    var scene;
+    
     var map = (window.map = new mapboxgl.Map({
         container: 'map',
         style: 'mapbox://styles/mapbox/light-v10',
@@ -59,43 +107,58 @@
         renderingMode: '3d',
         onAdd: function(map, gl) {
             this.camera = new THREE.Camera();
-            this.scene = new THREE.Scene();
+            scene = new THREE.Scene();
 
             // create two three.js lights to illuminate the model
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(0, -70, 100).normalize();
             //directionalLight.position.set(0, 0, 0).normalize();
-            this.scene.add(directionalLight);
+            scene.add(directionalLight);
 
             var directionalLight2 = new THREE.DirectionalLight(0xffffff);
             directionalLight2.position.set(0, 70, 100).normalize();
             //directionalLight2.position.set(0, 0, 0).normalize();
-            this.scene.add(directionalLight2);
+            scene.add(directionalLight2);
 
             // use the three.js GLTF loader to add the 3D model to the three.js scene
             var loader = new THREE.GLTFLoader();
+
+            var model;
             loader.load(
                 'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2Fout.glb?v=1592320077781', result => { 
-                model = result.scene.children[0]; //select first object in the model file
-                model.position.set(0,0,0); //set model position
-                this.scene.add(model); //add model to the scene
+                model = result.scene.children[0];
+                model.position.set(0,4,0); 
+                scene.add(model);
             });
+            
             loader.load(
                 'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2Fout.glb?v=1592320077781', result => { 
-                model = result.scene.children[0]; //select first object in the model file
-                model.position.set(0,4,0); //set model position
-                this.scene.add(model); //add model to the scene
+                theModel = result.scene.children[0];
+                theModel.position.set(0,0,0);
+                theModel.name = "theModel";
+                //theModel.visible = false;
+                scene.add(theModel);
             });
+
+            //----
+            //this.scene.remove(theModel);
+            // var selectedObject = this.scene.getObjectByName(theModel.name);
+            // this.scene.remove( selectedObject );
+            //animate();
+            //this.scene.
+            //model.visible = true;
+
+
             this.map = map;
 
             // use the Mapbox GL JS map canvas for three.js
-            this.renderer = new THREE.WebGLRenderer({
+            renderer = new THREE.WebGLRenderer({
                 canvas: map.getCanvas(),
                 context: gl,
                 antialias: true
             });
 
-            this.renderer.autoClear = false;
+            renderer.autoClear = false;
         },
         render: function(gl, matrix) {
             var rotationX = new THREE.Matrix4().makeRotationAxis(
@@ -130,15 +193,81 @@
                 .multiply(rotationZ);
 
             this.camera.projectionMatrix = m.multiply(l);
-            this.renderer.state.reset();
-            this.renderer.render(this.scene, this.camera);
+            renderer.state.reset();
+            renderer.render(scene, this.camera);
             this.map.triggerRepaint();
         }
     };
 
     map.on('style.load', function() {
         map.addLayer(customLayer, 'waterway-label');
+        
+        // enumerate ids of the layers
+        var toggleableLayerIds = ['contours', 'museums'];
+        
+        // set up the corresponding toggle button for each layer
+        for (var i = 0; i < toggleableLayerIds.length; i++) {
+            var id = toggleableLayerIds[i];
+            
+            var link = document.createElement('a');
+            link.href = '#';
+            link.className = 'active';
+            link.textContent = id;
+            
+            link.onclick = function(e) {
+
+                //this.scene = new THREE.Scene();
+                scene.remove(theModel);
+                renderStart();
+
+                // var clickedLayer = this.textContent;
+                // e.preventDefault();
+                // e.stopPropagation();
+                
+                // var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+                
+                // // toggle layer visibility by changing the layout object's visibility property
+                // if (visibility === 'visible') {
+                // map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                // this.className = '';
+                // } else {
+                // this.className = 'active';
+                // map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                // }
+            };
+            
+            link.ondblclick = function(e) {
+
+                //this.scene = new THREE.Scene();
+                scene.add(theModel);
+                renderStart();
+
+                // var clickedLayer = this.textContent;
+                // e.preventDefault();
+                // e.stopPropagation();
+                
+                // var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
+                
+                // // toggle layer visibility by changing the layout object's visibility property
+                // if (visibility === 'visible') {
+                // map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                // this.className = '';
+                // } else {
+                // this.className = 'active';
+                // map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
+                // }
+            };
+            
+            var layers = document.getElementById('menu');
+            layers.appendChild(link);
+        }
     });
+
+
+    function renderStart() {
+        renderer.render( scene, camera );
+    }
+    
 </script>
 
 </body>
