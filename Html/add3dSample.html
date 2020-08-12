@@ -61,7 +61,8 @@
 <div id="map"></div>
 <script>
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWxleGFuZGVyMjI0IiwiYSI6ImNrYW92dXpweTBiYzAyeHFlb3JoaGg3cjIifQ.9QlnMMIssEl5OmiIg7NYNA';
-    var theModel;
+    var model_negativ_two;
+    var model_negativ_one;
     var renderer;
     var scene;
     
@@ -123,31 +124,21 @@
             // use the three.js GLTF loader to add the 3D model to the three.js scene
             var loader = new THREE.GLTFLoader();
 
-            var model;
             loader.load(
-                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2Fout.glb?v=1592320077781', result => { 
-                model = result.scene.children[0];
-                model.position.set(0,4,0); 
-                scene.add(model);
+                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2F(180)-2_mX200.gltf?v=1597064293541', result => { 
+                model_negativ_two = result.scene.children[0];
+                model_negativ_two.position.set(0,10,0); 
+                scene.add(model_negativ_two);
             });
             
             loader.load(
-                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2Fout.glb?v=1592320077781', result => { 
-                theModel = result.scene.children[0];
-                theModel.position.set(0,0,0);
-                theModel.name = "theModel";
+                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2F(180)-1_mX200.gltf?v=1597064293498', result => { 
+                    model_negativ_one = result.scene.children[0];
+                    model_negativ_one.position.set(0,0,0);
+                    model_negativ_one.name = "model_negativ_one";
                 //theModel.visible = false;
-                scene.add(theModel);
+                scene.add(model_negativ_one);
             });
-
-            //----
-            //this.scene.remove(theModel);
-            // var selectedObject = this.scene.getObjectByName(theModel.name);
-            // this.scene.remove( selectedObject );
-            //animate();
-            //this.scene.
-            //model.visible = true;
-
 
             this.map = map;
 
@@ -202,70 +193,46 @@
     map.on('style.load', function() {
         map.addLayer(customLayer, 'waterway-label');
         
-        // enumerate ids of the layers
-        var toggleableLayerIds = ['contours', 'museums'];
+        // -2
+        var link = document.createElement('a');
+        link.href = '#';
+        link.className = 'active';
+        link.textContent = "-2";
         
-        // set up the corresponding toggle button for each layer
-        for (var i = 0; i < toggleableLayerIds.length; i++) {
-            var id = toggleableLayerIds[i];
-            
-            var link = document.createElement('a');
-            link.href = '#';
-            link.className = 'active';
-            link.textContent = id;
-            
-            link.onclick = function(e) {
+        link.onclick = function(e) {
+            scene.remove(model_negativ_one);
+            renderStart();
+            scene.add(model_negativ_two);
+            renderStart();
+        };
+        
+        var layers = document.getElementById('menu');
+        layers.appendChild(link);
 
-                //this.scene = new THREE.Scene();
-                scene.remove(theModel);
-                renderStart();
-
-                // var clickedLayer = this.textContent;
-                // e.preventDefault();
-                // e.stopPropagation();
-                
-                // var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-                
-                // // toggle layer visibility by changing the layout object's visibility property
-                // if (visibility === 'visible') {
-                // map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-                // this.className = '';
-                // } else {
-                // this.className = 'active';
-                // map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
-                // }
-            };
-            
-            link.ondblclick = function(e) {
-
-                //this.scene = new THREE.Scene();
-                scene.add(theModel);
-                renderStart();
-
-                // var clickedLayer = this.textContent;
-                // e.preventDefault();
-                // e.stopPropagation();
-                
-                // var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-                
-                // // toggle layer visibility by changing the layout object's visibility property
-                // if (visibility === 'visible') {
-                // map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-                // this.className = '';
-                // } else {
-                // this.className = 'active';
-                // map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
-                // }
-            };
-            
-            var layers = document.getElementById('menu');
-            layers.appendChild(link);
-        }
+        // -1
+        var link = document.createElement('a');
+        link.href = '#';
+        link.className = 'active';
+        link.textContent = "-1";
+        
+        link.onclick = function(e) {
+            scene.remove(model_negativ_two);
+            renderStart();
+            scene.add(model_negativ_one);
+            renderStart();
+        };
+        
+        var layers = document.getElementById('menu');
+        layers.appendChild(link);
     });
 
 
     function renderStart() {
-        renderer.render( scene, camera );
+        try {
+            renderer.render( scene, camera );
+        } catch(e) {
+            console.error(e);
+        }
     }
     
 </script>
