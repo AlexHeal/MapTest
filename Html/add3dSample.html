@@ -125,16 +125,16 @@
             var loader = new THREE.GLTFLoader();
 
             loader.load(
-                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2F(180)-2_mX200.gltf?v=1597064293541', result => { 
+                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2F-1_mX200_floor.gltf?v=1597268346763', result => { 
                 model_negativ_two = result.scene.children[0];
-                model_negativ_two.position.set(0,10,0); 
+                model_negativ_two.position.set(0,0,0); 
                 scene.add(model_negativ_two);
             });
             
             loader.load(
-                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2F(180)-1_mX200.gltf?v=1597064293498', result => { 
+                'https://cdn.glitch.com/8739ee63-7cbd-41d8-8919-b8c0b15d75c7%2F-2_mX200_floor.gltf?v=1597268347282', result => { 
                     model_negativ_one = result.scene.children[0];
-                    model_negativ_one.position.set(0,0,0);
+                    model_negativ_one.position.set(0,10,0);
                     model_negativ_one.name = "model_negativ_one";
                 //theModel.visible = false;
                 scene.add(model_negativ_one);
